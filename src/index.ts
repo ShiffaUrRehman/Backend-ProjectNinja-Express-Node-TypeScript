@@ -1,15 +1,18 @@
-const express = require("express");
-const dotenv = require("dotenv");
+import 'dotenv/config';
+import App from './app';
+// import AuthenticationController from './authentication/authentication.controller';
+// import PostController from './post/post.controller';
+// import ReportController from './report/report.controller';
+// import UserController from './user/user.controller';
 
-dotenv.config();
 
-const app = express();
-const port = process.env.PORT;
+const app = new App(
+  // [
+  //   new PostController(),
+  //   new AuthenticationController(),
+  //   new UserController(),
+  //   new ReportController(),
+  // ],
+);
 
-// app.get("/", (req, res) => {
-//   res.send("Express + TypeScript Server");
-// });
-
-app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
-});
+app.listen();
