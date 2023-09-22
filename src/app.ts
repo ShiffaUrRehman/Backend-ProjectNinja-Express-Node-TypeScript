@@ -1,16 +1,19 @@
+
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
+import Controller from 'interfaces/controller_interface';
 import * as mongoose from 'mongoose';
-// import Controller from './interfaces/controller.interface';
 
 
 class App {
     public app: express.Application;
 
-    constructor(){
+    constructor(controllers: Controller[]){
+        
         this.app = express()
         this.connectToDataBase();
         this.initializeMiddlewares();
+        this.initializeControllers(controllers);
     }
 
     public listen(){
@@ -36,7 +39,14 @@ class App {
     private initializeMiddlewares() {
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({ extended: false }));
-      }
+        
+    }
+
+      private initializeControllers(controllers: Controller[]) {
+        controllers.forEach((controller) => {
+          this.app.use('/api', controller.router);
+        });
+    }
 
 }
 
