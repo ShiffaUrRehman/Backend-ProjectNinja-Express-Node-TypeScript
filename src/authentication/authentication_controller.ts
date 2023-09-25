@@ -1,7 +1,7 @@
 import * as bcrypt from 'bcrypt';
 import { Request, Response, NextFunction, Router } from 'express';
 import * as jwt from 'jsonwebtoken';
-import Controller from '../interfaces/controller_interface';
+import Controller from '../interface/controller_interface';
 import userModel from './../user/user_model';
 
 

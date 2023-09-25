@@ -1,7 +1,7 @@
 
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
-import Controller from 'interfaces/controller_interface';
+import Controller from './interface/controller_interface';
 import * as mongoose from 'mongoose';
 
 

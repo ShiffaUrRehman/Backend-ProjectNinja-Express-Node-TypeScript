@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction,} from 'express';
 // import NotAuthorizedException from '../exceptions/NotAuthorizedException';
-import Controller from '../interfaces/controller_interface';
+import Controller from '../interface/controller_interface';
 // import authMiddleware from '../middleware/auth.middleware';
 // import postModel from '../post/post.model';
 import userModel from './user_model';
@@ -17,6 +17,7 @@ class UserController implements Controller {
     }
 
     private initializeRoutes(){
+      // Add Middlewares
         this.router.post(`${this.path}`,this.createUser)
         this.router.get(`${this.path}`,this.getAllUsers)
         this.router.get(`${this.path}/:id`,this.getUser)
@@ -34,9 +35,9 @@ class UserController implements Controller {
                 role: req.body.role,
               });
             const result = await userNew.save();
-            res.status(201).send(result);
+            return res.status(201).send(result);
           } catch (err:any) { // will this stay any?
-            res.status(500).send({ message: err.message });
+            return res.status(500).send({ message: err.message });
           }
     }
 
@@ -46,9 +47,9 @@ class UserController implements Controller {
     private getAllUsers = async (req: Request, res: Response, next: NextFunction) =>{
         try {
             const users: User[] = await this.user.find();
-            res.status(200).send(users);
+            return res.status(200).send(users);
           } catch (err:any) {
-            res.status(500).send({ message: err.message });
+            return res.status(500).send({ message: err.message });
           }
     }
 
@@ -58,9 +59,9 @@ class UserController implements Controller {
     private getUser =  async(req: Request, res: Response, next: NextFunction)=>{
         try {
             const user: User = await this.user.findById(req.params.id);
-            res.status(200).send(user);
+            return res.status(200).send(user);
           } catch (err:any) {
-            res.status(500).send({ message: err.message });
+            return res.status(500).send({ message: err.message });
           }
     }
 
