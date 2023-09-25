@@ -25,7 +25,7 @@ class UserController implements Controller {
 
     // @desc    Create a user
     // @route   POST /api/user
-    // Public Endpoint
+    // Private Endpoint
     private createUser = async (req: Request, res: Response, next: NextFunction)=>{
         try {
             const userNew = new this.user({
@@ -43,7 +43,7 @@ class UserController implements Controller {
 
     // @desc    Get all users
     // @route   GET /api/user
-    // Public Endpoint
+    // Private Endpoint
     private getAllUsers = async (req: Request, res: Response, next: NextFunction) =>{
         try {
             const users: User[] = await this.user.find();
@@ -55,7 +55,7 @@ class UserController implements Controller {
 
     // @desc    Get all users
     // @route   GET /api/user/id
-    // Public Endpoint
+    // Private Endpoint
     private getUser =  async(req: Request, res: Response, next: NextFunction)=>{
         try {
             const user: User = await this.user.findById(req.params.id);
