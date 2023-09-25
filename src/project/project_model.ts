@@ -27,25 +27,25 @@ const projectSchema = new mongoose.Schema(
             ref: "User",
             required: true,
           },
-          teamLead: [
+          teamLead: 
             {
               type: mongoose.Schema.Types.ObjectId,
               ref: "User",
-              default: []
+              default: undefined,
             },
-          ],
+        
           teamMember: [
             {
               type: mongoose.Schema.Types.ObjectId,
               ref: "User",
-              default: []
+              default: undefined
             },
           ],
           task: [
             {
               type: mongoose.Schema.Types.ObjectId,
               ref: "Task",
-              default: []
+              default: undefined
             },
           ],
 

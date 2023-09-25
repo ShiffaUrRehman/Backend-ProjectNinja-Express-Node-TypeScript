@@ -20,7 +20,7 @@ class UserController implements Controller {
       // Add Middlewares
         this.router.post(`${this.path}`,this.createUser)
         this.router.get(`${this.path}`,this.getAllUsers)
-        this.router.get(`${this.path}/:id`,this.getUser)
+        this.router.get(`${this.path}/get/:id`,this.getUser)
     }
 
     // @desc    Create a user
@@ -47,6 +47,7 @@ class UserController implements Controller {
     private getAllUsers = async (req: Request, res: Response, next: NextFunction) =>{
         try {
             const users: User[] = await this.user.find();
+            if(!users) {return res.status(404).send({message: "Error fetching Users"});}
             return res.status(200).send(users);
           } catch (err:any) {
             return res.status(500).send({ message: err.message });
@@ -54,11 +55,12 @@ class UserController implements Controller {
     }
 
     // @desc    Get all users
-    // @route   GET /api/user/id
+    // @route   GET /api/user/get/id
     // Private Endpoint
     private getUser =  async(req: Request, res: Response, next: NextFunction)=>{
         try {
             const user: User = await this.user.findById(req.params.id);
+            if(!user) {return res.status(404).send({message: "Error fetching User"});}
             return res.status(200).send(user);
           } catch (err:any) {
             return res.status(500).send({ message: err.message });
