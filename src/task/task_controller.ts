@@ -18,6 +18,8 @@ class TaskController implements Controller {
         // Add Middlewares
         this.router.post(`${this.path}`, validateBody(createTaskSchema), this.createTask)
         this.router.get(`${this.path}/getAll/:id`, this.getTasks)
+        this.router.put(`${this.path}/add`, this.AddMemberToTask)
+        this.router.put(`${this.path}/remove`, this.RemoveMemberFromTask)
         
     }
 
@@ -51,6 +53,46 @@ class TaskController implements Controller {
             return res.status(500).send({ message: err.message });
           }
     }
+
+    // @desc    Add Member to Task
+    // @route   PUT /api/task/remove
+    // Private Endpoint
+    private AddMemberToTask = async (req: Request, res: Response, next: NextFunction)=>{
+      try {
+        const taskNow = await this.task.findById(req.body.taskId)
+        if(!taskNow){return res.status(404).send({message: "Task not found"});}
+        const index = taskNow.assignedTo.indexOf(req.body.member);
+            if (index !== -1) {
+               return res.status(401).send({message: "Member already added to Task"});
+            }
+          taskNow.assignedTo.push(req.body.member);
+          const result = await taskNow.save();
+          if(!result) {return res.status(401).send({message: "Error while saving task"});}
+          return res.status(201).send(result);
+        } catch (err:any) { // will this stay any?
+          return res.status(500).send({ message: err.message });
+        }
+  }
+
+  // @desc    Remove Member from Task
+    // @route   PUT /api/task/remove
+    // Private Endpoint
+    private RemoveMemberFromTask = async (req: Request, res: Response, next: NextFunction)=>{
+      try {
+        const taskNow = await this.task.findById(req.body.taskId)
+        if(!taskNow){return res.status(404).send({message: "Task not found"});}
+        const index = taskNow.assignedTo.indexOf(req.body.member);
+            if (index === -1) {
+               return res.status(401).send({message: "Member not found"});
+            }
+            taskNow.assignedTo.splice(index, 1);
+            const result = await taskNow.save();
+          if(!result) {return res.status(401).send({message: "Error while saving task"});}
+          return res.status(201).send(result);
+        } catch (err:any) { // will this stay any?
+          return res.status(500).send({ message: err.message });
+        }
+  }
 
 }
 
