@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction,} from 'express';
 import Controller from '../interface/controller_interface';
 import taskModel from './task_model';
-import { createTaskSchema ,validateBody } from '../middleware/validateBody';
+import { createTaskSchema, changeStatusTask ,validateBody } from '../middleware/validateBody';
 import { Task } from './task_interface';
 
 class TaskController implements Controller {
@@ -20,6 +20,7 @@ class TaskController implements Controller {
         this.router.get(`${this.path}/getAll/:id`, this.getTasks)
         this.router.put(`${this.path}/add`, this.AddMemberToTask)
         this.router.put(`${this.path}/remove`, this.RemoveMemberFromTask)
+        this.router.put(`${this.path}/status`,validateBody(changeStatusTask), this.changeStatusTask)
         
     }
 
@@ -87,6 +88,22 @@ class TaskController implements Controller {
             }
             taskNow.assignedTo.splice(index, 1);
             const result = await taskNow.save();
+          if(!result) {return res.status(401).send({message: "Error while saving task"});}
+          return res.status(201).send(result);
+        } catch (err:any) { // will this stay any?
+          return res.status(500).send({ message: err.message });
+        }
+  }
+
+  // @desc    Change Status of Task
+    // @route   PUT /api/task/status
+    // Private Endpoint
+    private changeStatusTask = async (req: Request, res: Response, next: NextFunction)=>{
+      try {
+        const taskNow = await this.task.findById(req.body.taskId)
+        if(!taskNow){return res.status(404).send({message: "Task not found"});}
+        taskNow.status = req.body.status;
+        const result = await taskNow.save();
           if(!result) {return res.status(401).send({message: "Error while saving task"});}
           return res.status(201).send(result);
         } catch (err:any) { // will this stay any?
