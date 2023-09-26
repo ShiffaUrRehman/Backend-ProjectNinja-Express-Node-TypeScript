@@ -5,6 +5,7 @@ import AuthenticationController from "./authentication/authentication_controller
 import ProjectController from "./project/project_controller";
 import TaskController from "task/task_controller";
 
+// Validate Environment variables?
 
 dotenv.config()
 
@@ -16,11 +17,6 @@ const app = new App(
     new TaskController()
   ]
   );
-  // [
-  //   new PostController(),
-  //   new AuthenticationController(),
-  //   new ReportController(),
-  // ],
 
 
 app.listen();

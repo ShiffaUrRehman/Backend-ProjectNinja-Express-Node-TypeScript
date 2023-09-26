@@ -3,6 +3,9 @@ import { Request, Response, NextFunction, Router } from 'express';
 import * as jwt from 'jsonwebtoken';
 import Controller from '../interface/controller_interface';
 import userModel from './../user/user_model';
+import { User } from 'user/user_interface';
+import TokenData from '../interface/tokenData_interface';
+import DataStoredInToken from '../interface/dataStoredInToken';
 
 
 
@@ -27,20 +30,29 @@ class AuthenticationController implements Controller{
             const user = await this.User.findOne({ username: req.body.username });
             if (!user) return res.status(404).send({ message: "User not found" });
             else {
-              const isValid = await bcrypt.compare(req.body.password, user.password);
-              if (!isValid) {
+              const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
+              if (!isPasswordCorrect) {
                 return res.status(404).send({ message: "Provided password is incorrect" });
               } else {
-                const obj = { id: user._id };
-                const token = jwt.sign(obj, process.env.ACCESS_TOKEN_SECRET, {
-                  expiresIn: "1d",
-                });
-                res.status(200).send({ user, token: token });
+                const token = this.createToken(user)
+                res.status(200).send({ user, token });
               }
             }
           } catch (err: any) {
             res.status(500).send({ message: err.message });
           }
+    }
+
+    private createToken(user: User): TokenData {
+      const expiresIn = "1d"
+      const secret = process.env.ACCESS_TOKEN_SECRET;
+      const dataStoredInToken: DataStoredInToken = {
+        _id: user._id,
+      };
+      return {
+        expiresIn,
+        token: jwt.sign(dataStoredInToken, secret, { expiresIn }),
+      };
     }
 }
 
