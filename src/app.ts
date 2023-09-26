@@ -3,7 +3,7 @@ import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import * as mongoose from 'mongoose';
 import Controller from './interface/controller_interface';
-import errorMiddleware from 'middleware/errorMiddleware';
+import errorMiddleware from './middleware/errorMiddleware';
 
 
 class App {
