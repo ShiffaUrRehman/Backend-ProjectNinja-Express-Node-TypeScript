@@ -96,6 +96,10 @@ class ProjectController implements Controller{
             // validate whether the teamMember id being passed is a team member or not
             const project = await this.project.findById(req.params.id);
             if(!project) {return res.status(404).send({message: "Project not found"});}
+            const index = project.teamMember.indexOf(req.body.teamMember);
+            if (index !== -1) {
+               return res.status(401).send({message: "Member already added to Project"});
+            }
             project.teamMember.push(req.body.teamMember);
             const result = await project.save();
             if(!result) {return res.status(400).send({message: "Error while saving document"});}
@@ -115,7 +119,6 @@ class ProjectController implements Controller{
             const project = await this.project.findById(req.params.id);
             if(!project) {return res.status(404).send({message: "Project not found"});}
             const members = project.teamMember; // remove
-            console.log(members);
             const index = members.indexOf(req.body.teamMember);
             if (index === -1) {
                return res.status(404).send({message: "Member not found"});

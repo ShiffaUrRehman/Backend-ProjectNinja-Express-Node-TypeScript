@@ -9,7 +9,6 @@ export interface Project {
     status: ProjectStatus,
     projectManager: ObjectId,
     teamLead:ObjectId,
-    teamMember: ObjectId[]
-    task: ObjectId[]
+    teamMember: ObjectId[],
 }
 

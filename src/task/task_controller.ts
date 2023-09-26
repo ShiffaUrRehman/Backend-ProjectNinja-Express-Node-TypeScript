@@ -1,15 +1,14 @@
 import { Router, Request, Response, NextFunction,} from 'express';
 import Controller from '../interface/controller_interface';
 import taskModel from './task_model';
-import projectModel from '../project/project_model';
-import { createTaskSchema ,validateBody } from 'middleware/validateBody';
+import { createTaskSchema ,validateBody } from '../middleware/validateBody';
+import { Task } from './task_interface';
 
 class TaskController implements Controller {
     
     path: string = "/task";
     router: Router = Router();
     private task = taskModel;
-    private project = projectModel;
 
     constructor(){
         this.initialiseRoutes()
@@ -18,8 +17,22 @@ class TaskController implements Controller {
     private initialiseRoutes(){
         // Add Middlewares
         this.router.post(`${this.path}`, validateBody(createTaskSchema), this.createTask)
+        this.router.get(`${this.path}/getAll/:id`, this.getTasks)
         
     }
+
+    // @desc    Get Tasks of Project
+    // @route   Get /api/task/getAll/:id
+    // Private Endpoint
+    private getTasks = async (req: Request, res: Response, next: NextFunction)=>{
+      try {
+        const tasks: Task[] = await this.task.find({projectId: req.params.id})
+        if(!tasks) {return res.status(401).send({message: "Error while fetching tasks"});}
+          return res.status(200).send(tasks);
+        } catch (err:any) { // will this stay any?
+          return res.status(500).send({ message: err.message });
+        }
+  }
 
     // @desc    Create a Task
     // @route   POST /api/task
@@ -28,14 +41,11 @@ class TaskController implements Controller {
         try {
             const taskNew = new this.task({
                 description: req.body.description,
-                assignedTo: req.body.assignedTo,                
+                assignedTo: req.body.assignedTo, 
+                projectId: req.body.projectId,           
               });
             const result = await taskNew.save();
             if(!result) {return res.status(401).send({message: "Error while saving task"});}
-            const projectNow = await this.project.findById(req.body.projectId);
-            projectNow.task.push(result._id);
-            const result2 = await projectNow.save();
-            if(!result2) {return res.status(401).send({message: "Error while saving id to task array"});}
             return res.status(201).send(result);
           } catch (err:any) { // will this stay any?
             return res.status(500).send({ message: err.message });

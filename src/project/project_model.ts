@@ -41,13 +41,6 @@ const projectSchema = new mongoose.Schema(
               default: undefined
             },
           ],
-          task: [
-            {
-              type: mongoose.Schema.Types.ObjectId,
-              ref: "Task",
-              default: undefined
-            },
-          ],
 
     }
 );
