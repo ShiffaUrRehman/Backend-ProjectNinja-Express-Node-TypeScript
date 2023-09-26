@@ -36,7 +36,7 @@ export const addTeamLeadProjectSchema = yup.object({
 
   export const createTaskSchema = yup.object({
     description: yup.string().required().max(1024),
-    assignedTo: yup.string().required().max(1024),
+    assignedTo: yup.array(),
     projectId: yup.string().required().max(1024),
   });
 
