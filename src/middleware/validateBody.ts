@@ -21,8 +21,19 @@ export const createProjectSchema = yup.object({
   projectManager: yup.string().required().max(1024),
 });
 
+export const updateProjectStatusSchema = yup.object({
+    status: yup.string().required()
+    .oneOf(["Onboarding", "In Progress", "Complete"]),
+  });
 
-export const validateBody = (schema: (typeof createUserSchema) | (typeof loginUserSchema) | (typeof createProjectSchema)) => async (req: Request, res: Response, next: NextFunction) => {
+export const addTeamLeadProjectSchema = yup.object({
+    teamLead: yup.string().required().max(1024),
+  });
+
+  export const addOrRemoveTeamMemberProjectSchema = yup.object({
+    teamMember: yup.string().required().max(1024),
+  });
+export const validateBody = (schema: (typeof createUserSchema) | (typeof loginUserSchema) | (typeof createProjectSchema)|(typeof updateProjectStatusSchema)|(typeof addTeamLeadProjectSchema)|(typeof addOrRemoveTeamMemberProjectSchema)) => async (req: Request, res: Response, next: NextFunction) => {
   try {
     await schema.validate(req.body, { strict: true });
     return next();

@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction,} from 'express';
 import Controller from '../interface/controller_interface';
 import projectModel from './project_model';
 import { Project } from './project_interface';
+import { createProjectSchema, updateProjectStatusSchema, addTeamLeadProjectSchema, addOrRemoveTeamMemberProjectSchema ,validateBody } from '../middleware/validateBody';
 
 class ProjectController implements Controller{
     
@@ -15,12 +16,12 @@ class ProjectController implements Controller{
 
     private initializeRoutes(){
         // Add Middlewares
-          this.router.post(`${this.path}`,this.createProject)
-          this.router.get(`${this.path}`,this.getAllProjects)
-          this.router.put(`${this.path}/status/:id`,this.updateProjectStatus)
-          this.router.put(`${this.path}/teamLead/:id`,this.addTeamLead)
-          this.router.put(`${this.path}/teamMember/:id`,this.addTeamMember)
-          this.router.put(`${this.path}/teamMember/remove/:id`,this.removeTeamMember)
+          this.router.post(`${this.path}`, validateBody(createProjectSchema) ,this.createProject)
+          this.router.get(`${this.path}`, this.getAllProjects)
+          this.router.put(`${this.path}/status/:id`, validateBody(updateProjectStatusSchema) , this.updateProjectStatus)
+          this.router.put(`${this.path}/teamLead/:id`, validateBody(addTeamLeadProjectSchema), this.addTeamLead)
+          this.router.put(`${this.path}/teamMember/:id`, validateBody(addOrRemoveTeamMemberProjectSchema), this.addTeamMember)
+          this.router.put(`${this.path}/teamMember/remove/:id`, validateBody(addOrRemoveTeamMemberProjectSchema), this.removeTeamMember)
           
       }
 
@@ -113,7 +114,6 @@ class ProjectController implements Controller{
             // validate whether the teamMember id being passed is a team member or not
             const project = await this.project.findById(req.params.id);
             if(!project) {return res.status(404).send({message: "Project not found"});}
-            console.log('hi');
             const members = project.teamMember; // remove
             console.log(members);
             const index = members.indexOf(req.body.teamMember);
