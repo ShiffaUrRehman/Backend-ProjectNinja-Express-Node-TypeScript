@@ -7,7 +7,7 @@ import { User } from 'user/user_interface';
 import TokenData from '../interface/tokenData_interface';
 import DataStoredInToken from '../interface/dataStoredInToken';
 import WrongCredentialsException from '../exceptions/WrongCredentialsException';
-
+import { loginUserSchema, validateBody } from '../middleware/validateBody';
 
 
 class AuthenticationController implements Controller{
@@ -20,7 +20,7 @@ class AuthenticationController implements Controller{
     }
 
     private initializeRoutes(){
-        this.router.post(`${this.path}/login`, this.login)
+        this.router.post(`${this.path}/login`, validateBody(loginUserSchema) , this.login)
     }
 
     // @desc    Login a User

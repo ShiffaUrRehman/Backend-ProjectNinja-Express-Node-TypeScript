@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction,} from 'express';
+import { createUserSchema,validateBody } from '../middleware/validateBody';
 // import NotAuthorizedException from '../exceptions/NotAuthorizedException';
 import Controller from '../interface/controller_interface';
 // import authMiddleware from '../middleware/auth.middleware';
@@ -18,7 +19,7 @@ class UserController implements Controller {
 
     private initializeRoutes(){
       // Add Middlewares
-        this.router.post(`${this.path}`,this.createUser)
+        this.router.post(`${this.path}`,validateBody(createUserSchema), this.createUser)
         this.router.get(`${this.path}`,this.getAllUsers)
         this.router.get(`${this.path}/get/:id`,this.getUser)
     }

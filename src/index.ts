@@ -3,7 +3,7 @@ import App from './app';
 import UserController from './user/user_controller';
 import AuthenticationController from "./authentication/authentication_controller";
 import ProjectController from "./project/project_controller";
-import TaskController from "task/task_controller";
+import TaskController from "./task/task_controller";
 
 // Validate Environment variables?
 
