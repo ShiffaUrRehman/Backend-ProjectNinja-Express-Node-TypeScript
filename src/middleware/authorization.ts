@@ -50,7 +50,33 @@ export const authorizeProjectManager = async (req: RequestWithUser, res: Respons
   }
   else 
   {return res.status(403).send({
-    message: "Not Authorized, Only Admin/Project Manager can access this route",}
+    message: "Not Authorized, Only Admin / Project Manager can access this route",}
+  );
+}
+}
+
+export const authorizeTeamLead = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  // Check if the role is Admin or Not
+  // To authenticate Admin access only
+  if (req.user.role === "Admin" || req.user.role === "Project Manager" || req.user.role === "Team Lead") {
+    next();
+  }
+  else 
+  {return res.status(403).send({
+    message: "Not Authorized, Only Admin / Project Manager / Team Lead can access this route",}
+  );
+}
+}
+
+export const authorizeTeamMember = async (req: RequestWithUser, res: Response, next: NextFunction) => { // comment: Not sure if we need this
+  // Check if the role is Admin or Not
+  // To authenticate Admin access only
+  if (req.user.role === "Admin" || req.user.role === "Project Manager" || req.user.role === "Team Lead" || req.user.role === "Team Member") {
+    next();
+  }
+  else 
+  {return res.status(403).send({
+    message: "Not Authorized, Only Admin / Project Manager / Team Lead / Team Member can access this route",}
   );
 }
 }

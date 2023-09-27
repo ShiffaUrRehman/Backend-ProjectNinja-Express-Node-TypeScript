@@ -3,7 +3,7 @@ import Controller from '../interface/controller_interface';
 import projectModel from './project_model';
 import { Project } from './project_interface';
 import { createProjectSchema, updateProjectStatusSchema, addTeamLeadProjectSchema, addOrRemoveTeamMemberProjectSchema ,validateBody } from '../middleware/validateBody';
-import { authorizeAdmin, authorizeProjectManager, authorizeUser } from '../middleware/authorization';
+import { authorizeAdmin, authorizeProjectManager, authorizeTeamLead, authorizeTeamMember, authorizeUser } from '../middleware/authorization';
 import { RequestWithUser } from 'interface/requestWithUser';
 
 class ProjectController implements Controller{
@@ -20,6 +20,8 @@ class ProjectController implements Controller{
           this.router.post(`${this.path}`, authorizeUser, authorizeAdmin, validateBody(createProjectSchema) ,this.createProject)
           this.router.get(`${this.path}/get/admin`, authorizeUser, authorizeAdmin, this.getAllProjects)
           this.router.get(`${this.path}/get/projectManager`, authorizeUser, authorizeProjectManager, this.getProjectsProjectManager)
+          this.router.get(`${this.path}/get/teamLead`, authorizeUser, authorizeTeamLead, this.getProjectsTeamLead)
+          this.router.get(`${this.path}/get/teamMember`, authorizeUser, authorizeTeamMember, this.getProjectsTeamMembers)
           this.router.put(`${this.path}/add/teamLead/:projectId`, authorizeUser, authorizeProjectManager, validateBody(addTeamLeadProjectSchema), this.addTeamLead)
           this.router.put(`${this.path}/teamMember/:projectId`, authorizeUser, authorizeProjectManager, validateBody(addOrRemoveTeamMemberProjectSchema), this.addTeamMember)
           this.router.put(`${this.path}/teamMember/remove/:projectId`, authorizeUser, authorizeProjectManager, validateBody(addOrRemoveTeamMemberProjectSchema), this.removeTeamMember)
@@ -57,12 +59,38 @@ class ProjectController implements Controller{
           }
     }
 
-    // @desc    Get projects to which respective ProjectManager is assigned
+    // @desc    Get projects to which respective Project Manager is assigned
     // @route   GET /api/project/get/projectManager
     // Private Endpoint
     private getProjectsProjectManager = async (req: RequestWithUser, res: Response, next: NextFunction) =>{
       try {
           const projects: Project[] = await this.project.find({projectManager:req.user._id}).populate("projectManager", "fullname").populate("teamLead", "fullname").populate("teamMember", "fullname"); // comment: see if we need to populate all these or not
+          if(!projects) {return res.status(404).send({message: "Error fetching Projects"});}
+          return res.status(200).send(projects);
+        } catch (err:any) {
+          return res.status(500).send({ message: err.message });
+        }
+  }
+
+    // @desc    Get projects to which respective Team Lead is assigned
+    // @route   GET /api/project/get/teamLead
+    // Private Endpoint
+    private getProjectsTeamLead = async (req: RequestWithUser, res: Response, next: NextFunction) =>{
+      try {
+          const projects: Project[] = await this.project.find({teamLead:req.user._id, status: "In Progress"}).populate("projectManager", "fullname").populate("teamLead", "fullname").populate("teamMember", "fullname"); // comment: see if we need to populate all these or not
+          if(!projects) {return res.status(404).send({message: "Error fetching Projects"});}
+          return res.status(200).send(projects);
+        } catch (err:any) {
+          return res.status(500).send({ message: err.message });
+        }
+  }
+
+    // @desc    Get projects to which respective Team Member is assigned
+    // @route   GET /api/project/get/teamMember
+    // Private Endpoint
+    private getProjectsTeamMembers = async (req: RequestWithUser, res: Response, next: NextFunction) =>{
+      try {
+          const projects: Project[] = await this.project.find({teamMember:req.user._id, status: "In Progress"}).populate("projectManager", "fullname").populate("teamLead", "fullname").populate("teamMember", "fullname"); // comment: see if we need to populate all these or not
           if(!projects) {return res.status(404).send({message: "Error fetching Projects"});}
           return res.status(200).send(projects);
         } catch (err:any) {
