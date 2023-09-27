@@ -19,7 +19,7 @@ class App {
     }
 
     public listen(){
-      // should this be in try catch?
+      // comment: should this be in try catch?
         this.app.listen(process.env.PORT, () => {
             console.log(`App listening on the port ${process.env.PORT}`);
           })
@@ -33,7 +33,7 @@ class App {
         const {
             DB_URL_LOCAL,
           } = process.env;
-          // should this be in try catch?
+          // comment: should this be in try catch?
         mongoose.connect(DB_URL_LOCAL)
         .then(() => console.log("Connected to DB successfully"))
         .catch((err) => console.log("Error while connecting to DB", err.message));
@@ -47,7 +47,7 @@ class App {
     private initializeErrorHandling() {
       this.app.use(errorMiddleware);
     }
-    // why not add this to initializeMiddlewares?
+    // comment: why not add this to initializeMiddlewares?
 
       private initializeControllers(controllers: Controller[]) {
         controllers.forEach((controller) => {

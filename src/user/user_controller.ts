@@ -3,7 +3,7 @@ import { createUserSchema,validateBody } from '../middleware/validateBody';
 import Controller from '../interface/controller_interface';
 import userModel from './user_model';
 import { User } from './user_interface';
-import { authorizeAdmin, authorizeUser } from '../middleware/authorization';
+import { authorizeAdmin, authorizeProjectManager, authorizeUser } from '../middleware/authorization';
 
 
 class UserController implements Controller {
@@ -18,8 +18,10 @@ class UserController implements Controller {
     private initializeRoutes(){
         this.router.post(`${this.path}`, authorizeUser, authorizeAdmin, validateBody(createUserSchema), this.createUser)
         this.router.get(`${this.path}`, authorizeUser, authorizeAdmin, this.getAllUsers)
-        this.router.get(`${this.path}/get/:id`, authorizeUser, authorizeAdmin, this.getUser)
+        this.router.get(`${this.path}/getOne/:id`, authorizeUser, authorizeAdmin, this.getUser)
         this.router.delete(`${this.path}/delete/:id`, authorizeUser, authorizeAdmin, this.deleteUser)
+        this.router.get(`${this.path}/get/teamLead`, authorizeUser, this.getTeamLeads) // comment: Who would be able to access this?
+        
     }
 
     // @desc    Create a user
@@ -54,7 +56,7 @@ class UserController implements Controller {
     }
 
     // @desc    Get single user
-    // @route   GET /api/user/get/:id
+    // @route   GET /api/user/getOne/:id
     // Private Endpoint
     private getUser =  async(req: Request, res: Response, next: NextFunction)=>{
         try {
@@ -74,6 +76,19 @@ class UserController implements Controller {
           const user: User = await this.user.findByIdAndDelete(req.params.id);
           if(!user) {return res.status(404).send({message: "Error while deleting User"});}
           return res.status(200).send(user);
+        } catch (err:any) {
+          return res.status(500).send({ message: err.message });
+        }
+  }
+
+    // @desc    Get all users
+    // @route   GET /api/user/get/teamLeads
+    // Private Endpoint
+    private getTeamLeads = async (req: Request, res: Response, next: NextFunction) =>{
+      try {
+          const users: User[] = await this.user.find({role:"Team Lead"});
+          if(!users) {return res.status(404).send({message: "Error fetching Team Leads"});}
+          return res.status(200).send(users);
         } catch (err:any) {
           return res.status(500).send({ message: err.message });
         }

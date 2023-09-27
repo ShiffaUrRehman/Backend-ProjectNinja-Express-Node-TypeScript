@@ -17,14 +17,13 @@ class ProjectController implements Controller{
     }
 
     private initializeRoutes(){
-        // Add Middlewares
           this.router.post(`${this.path}`, authorizeUser, authorizeAdmin, validateBody(createProjectSchema) ,this.createProject)
           this.router.get(`${this.path}/get/admin`, authorizeUser, authorizeAdmin, this.getAllProjects)
-          this.router.get(`${this.path}/get/projectManager`, authorizeUser, authorizeProjectManager, this.getProjectsPM)
-          this.router.put(`${this.path}/status/:id`, authorizeUser, validateBody(updateProjectStatusSchema) , this.updateProjectStatus)
-          this.router.put(`${this.path}/teamLead/:id`, authorizeUser, validateBody(addTeamLeadProjectSchema), this.addTeamLead)
+          this.router.get(`${this.path}/get/projectManager`, authorizeUser, authorizeProjectManager, this.getProjectsProjectManager)
+          this.router.put(`${this.path}/add/teamLead/:projectId`, authorizeUser, authorizeProjectManager, validateBody(addTeamLeadProjectSchema), this.addTeamLead)
           this.router.put(`${this.path}/teamMember/:id`, authorizeUser, validateBody(addOrRemoveTeamMemberProjectSchema), this.addTeamMember)
           this.router.put(`${this.path}/teamMember/remove/:id`, authorizeUser, validateBody(addOrRemoveTeamMemberProjectSchema), this.removeTeamMember)
+          this.router.put(`${this.path}/status/:id`, authorizeUser, validateBody(updateProjectStatusSchema) , this.updateProjectStatus)
           
       }
 
@@ -40,17 +39,17 @@ class ProjectController implements Controller{
               });
             const result = await projectNew.save();
             return res.status(201).send(result);
-          } catch (err:any) { // will this stay any?
+          } catch (err:any) { // comment: will this stay any?
             return res.status(500).send({ message: err.message });
           }
     }
 
-    // @desc    Get all projects
+    // @desc    Get all projects for Admin
     // @route   GET /api/project/get/admin
     // Private Endpoint
     private getAllProjects = async (req: Request, res: Response, next: NextFunction) =>{
         try {
-            const projects: Project[] = await this.project.find().populate("projectManager", "fullname").populate("teamLead", "fullname").populate("teamMember", "fullname");
+            const projects: Project[] = await this.project.find().populate("projectManager", "fullname").populate("teamLead", "fullname").populate("teamMember", "fullname"); // comment: see if we need to populate all these or not
             if(!projects) {return res.status(404).send({message: "Error fetching Projects"});}
             return res.status(200).send(projects);
           } catch (err:any) {
@@ -61,7 +60,7 @@ class ProjectController implements Controller{
     // @desc    Get projects to which respective ProjectManager is assigned
     // @route   GET /api/project/get/projectManager
     // Private Endpoint
-    private getProjectsPM = async (req: RequestWithUser, res: Response, next: NextFunction) =>{
+    private getProjectsProjectManager = async (req: RequestWithUser, res: Response, next: NextFunction) =>{
       try {
           const projects: Project[] = await this.project.find({projectManager:req.user._id}).populate("projectManager", "fullname").populate("teamLead", "fullname").populate("teamMember", "fullname"); // comment: see if we need to populate all these or not
           if(!projects) {return res.status(404).send({message: "Error fetching Projects"});}
@@ -71,35 +70,20 @@ class ProjectController implements Controller{
         }
   }
 
-    // @desc    Change Status of Project
-    // @route   PUT /api/project/status/:id
-    // Private Endpoint
-    private updateProjectStatus = async (req: Request, res: Response, next: NextFunction) =>{
-        try {
-            const project = await this.project.findById(req.params.id);
-            if(!project) {return res.status(404).send({message: "Project not found"});}
-            project.status = req.body.status;
-            const result = await project.save();
-            if(!result) {return res.status(400).send({message: "Error while saving document"});}
-            return res.status(200).send(result);
-          } catch (err:any) {
-            return res.status(500).send({ message: err.message });
-          }
-    }
-
     // @desc    Add/Replace Team Lead to Project
-    // @route   PUT /api/project/teamLead/:id
+    // @route   PUT /api/project/add/teamLead/:projectId
     // Private Endpoint
     private addTeamLead = async (req: Request, res: Response, next: NextFunction) =>{
         try {
-            // validate whether the teamLead id being passed is a team lead or not
-            const project = await this.project.findById(req.params.id);
+            // comment: validate whether the teamLead id being passed is a team lead or not
+            // From Frontend, I will give a dropdown having only team leads.
+            const project = await this.project.findById(req.params.projectId);
             if(!project) {return res.status(404).send({message: "Project not found"});}
             project.teamLead = req.body.teamLead;
             const result = await project.save();
             if(!result) {return res.status(400).send({message: "Error while saving document"});}
             return res.status(200).send(result);
-          } catch (err:any) {
+          } catch (err:any) { // comment: how to use custom error handler created by me
             return res.status(500).send({ message: err.message });
           }
     }
@@ -149,6 +133,22 @@ class ProjectController implements Controller{
             return res.status(500).send({ message: err.message });
           }
     }
+
+    // @desc    Change Status of Project
+    // @route   PUT /api/project/status/:id
+    // Private Endpoint
+    private updateProjectStatus = async (req: Request, res: Response, next: NextFunction) =>{
+      try {
+          const project = await this.project.findById(req.params.id);
+          if(!project) {return res.status(404).send({message: "Project not found"});}
+          project.status = req.body.status;
+          const result = await project.save();
+          if(!result) {return res.status(400).send({message: "Error while saving document"});}
+          return res.status(200).send(result);
+        } catch (err:any) {
+          return res.status(500).send({ message: err.message });
+        }
+  }
 }
 
 export default ProjectController;
