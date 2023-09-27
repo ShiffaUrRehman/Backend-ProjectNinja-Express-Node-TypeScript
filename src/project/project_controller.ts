@@ -3,6 +3,8 @@ import Controller from '../interface/controller_interface';
 import projectModel from './project_model';
 import { Project } from './project_interface';
 import { createProjectSchema, updateProjectStatusSchema, addTeamLeadProjectSchema, addOrRemoveTeamMemberProjectSchema ,validateBody } from '../middleware/validateBody';
+import { authorizeAdmin, authorizeProjectManager, authorizeUser } from '../middleware/authorization';
+import { RequestWithUser } from 'interface/requestWithUser';
 
 class ProjectController implements Controller{
     
@@ -16,12 +18,13 @@ class ProjectController implements Controller{
 
     private initializeRoutes(){
         // Add Middlewares
-          this.router.post(`${this.path}`, validateBody(createProjectSchema) ,this.createProject)
-          this.router.get(`${this.path}`, this.getAllProjects)
-          this.router.put(`${this.path}/status/:id`, validateBody(updateProjectStatusSchema) , this.updateProjectStatus)
-          this.router.put(`${this.path}/teamLead/:id`, validateBody(addTeamLeadProjectSchema), this.addTeamLead)
-          this.router.put(`${this.path}/teamMember/:id`, validateBody(addOrRemoveTeamMemberProjectSchema), this.addTeamMember)
-          this.router.put(`${this.path}/teamMember/remove/:id`, validateBody(addOrRemoveTeamMemberProjectSchema), this.removeTeamMember)
+          this.router.post(`${this.path}`, authorizeUser, authorizeAdmin, validateBody(createProjectSchema) ,this.createProject)
+          this.router.get(`${this.path}/get/admin`, authorizeUser, authorizeAdmin, this.getAllProjects)
+          this.router.get(`${this.path}/get/projectManager`, authorizeUser, authorizeProjectManager, this.getProjectsPM)
+          this.router.put(`${this.path}/status/:id`, authorizeUser, validateBody(updateProjectStatusSchema) , this.updateProjectStatus)
+          this.router.put(`${this.path}/teamLead/:id`, authorizeUser, validateBody(addTeamLeadProjectSchema), this.addTeamLead)
+          this.router.put(`${this.path}/teamMember/:id`, authorizeUser, validateBody(addOrRemoveTeamMemberProjectSchema), this.addTeamMember)
+          this.router.put(`${this.path}/teamMember/remove/:id`, authorizeUser, validateBody(addOrRemoveTeamMemberProjectSchema), this.removeTeamMember)
           
       }
 
@@ -43,7 +46,7 @@ class ProjectController implements Controller{
     }
 
     // @desc    Get all projects
-    // @route   GET /api/project
+    // @route   GET /api/project/get/admin
     // Private Endpoint
     private getAllProjects = async (req: Request, res: Response, next: NextFunction) =>{
         try {
@@ -54,6 +57,19 @@ class ProjectController implements Controller{
             return res.status(500).send({ message: err.message });
           }
     }
+
+    // @desc    Get projects to which respective ProjectManager is assigned
+    // @route   GET /api/project/get/projectManager
+    // Private Endpoint
+    private getProjectsPM = async (req: RequestWithUser, res: Response, next: NextFunction) =>{
+      try {
+          const projects: Project[] = await this.project.find({projectManager:req.user._id}).populate("projectManager", "fullname").populate("teamLead", "fullname").populate("teamMember", "fullname"); // comment: see if we need to populate all these or not
+          if(!projects) {return res.status(404).send({message: "Error fetching Projects"});}
+          return res.status(200).send(projects);
+        } catch (err:any) {
+          return res.status(500).send({ message: err.message });
+        }
+  }
 
     // @desc    Change Status of Project
     // @route   PUT /api/project/status/:id

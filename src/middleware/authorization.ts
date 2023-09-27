@@ -39,5 +39,18 @@ export const authorizeUser = async (req: RequestWithUser, res: Response, next:Ne
     {return res.status(403).send({
       message: "Not Authorized, Only Admin can access this route",}
     );
+  }
+};
+
+export const authorizeProjectManager = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  // Check if the role is Admin or Not
+  // To authenticate Admin access only
+  if (req.user.role === "Admin" || req.user.role === "Project Manager") {
+    next();
+  }
+  else 
+  {return res.status(403).send({
+    message: "Not Authorized, Only Admin/Project Manager can access this route",}
+  );
 }
-  };
+}

@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema(
         required: true,
       },
       role: {
-        type: String, // this should be role?
+        type: String, // comment: this should be role?
         enum: ["Project Manager", "Team Lead", "Team Member"],
         maxlength: 1024,
         required: true,
@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre("save", function (next: NextFunction) {
-    let user = this; // what would be the type here
+    let user = this; // comment: what would be the type here
   
     // only hash the password if it has been modified (or is new)
     if (!user.isModified("password")) return next();

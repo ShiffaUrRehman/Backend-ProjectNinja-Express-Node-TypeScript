@@ -1,13 +1,10 @@
 import { Router, Request, Response, NextFunction,} from 'express';
 import { createUserSchema,validateBody } from '../middleware/validateBody';
-// import NotAuthorizedException from '../exceptions/NotAuthorizedException';
 import Controller from '../interface/controller_interface';
-// import authMiddleware from '../middleware/auth.middleware';
-// import postModel from '../post/post.model';
 import userModel from './user_model';
 import { User } from './user_interface';
 import { authorizeAdmin, authorizeUser } from '../middleware/authorization';
-// import UserNotFoundException from '../exceptions/UserNotFoundException';
+
 
 class UserController implements Controller {
     public path = '/users'
@@ -19,7 +16,6 @@ class UserController implements Controller {
     }
 
     private initializeRoutes(){
-      // Add Middlewares
         this.router.post(`${this.path}`, authorizeUser, authorizeAdmin, validateBody(createUserSchema), this.createUser)
         this.router.get(`${this.path}`, authorizeUser, authorizeAdmin, this.getAllUsers)
         this.router.get(`${this.path}/get/:id`, authorizeUser, authorizeAdmin, this.getUser)
@@ -71,7 +67,7 @@ class UserController implements Controller {
     }
 
     // @desc    Delete all users
-    // @route   DELETE /api/user/delete/id
+    // @route   DELETE /api/user/delete/:id
     // Private Endpoint
     private deleteUser =  async(req: Request, res: Response, next: NextFunction)=>{
       try {

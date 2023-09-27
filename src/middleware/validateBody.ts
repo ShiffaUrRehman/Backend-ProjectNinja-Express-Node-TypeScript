@@ -17,7 +17,7 @@ export const loginUserSchema = yup.object({
 
 export const createProjectSchema = yup.object({
   name: yup.string().required().max(1024),
-  description: yup.string().notRequired().min(255),
+  description: yup.string().notRequired().min(8), // comment: .min(255)
   projectManager: yup.string().required().max(1024),
 });
 
