@@ -6,6 +6,7 @@ import Controller from '../interface/controller_interface';
 // import postModel from '../post/post.model';
 import userModel from './user_model';
 import { User } from './user_interface';
+import { authorizeAdmin, authorizeUser } from '../middleware/authorization';
 // import UserNotFoundException from '../exceptions/UserNotFoundException';
 
 class UserController implements Controller {
@@ -19,9 +20,10 @@ class UserController implements Controller {
 
     private initializeRoutes(){
       // Add Middlewares
-        this.router.post(`${this.path}`,validateBody(createUserSchema), this.createUser)
-        this.router.get(`${this.path}`,this.getAllUsers)
-        this.router.get(`${this.path}/get/:id`,this.getUser)
+        this.router.post(`${this.path}`, authorizeUser, authorizeAdmin, validateBody(createUserSchema), this.createUser)
+        this.router.get(`${this.path}`, authorizeUser, authorizeAdmin, this.getAllUsers)
+        this.router.get(`${this.path}/get/:id`, authorizeUser, authorizeAdmin, this.getUser)
+        this.router.delete(`${this.path}/delete/:id`, authorizeUser, authorizeAdmin, this.deleteUser)
     }
 
     // @desc    Create a user
@@ -55,8 +57,8 @@ class UserController implements Controller {
           }
     }
 
-    // @desc    Get all users
-    // @route   GET /api/user/get/id
+    // @desc    Get single user
+    // @route   GET /api/user/get/:id
     // Private Endpoint
     private getUser =  async(req: Request, res: Response, next: NextFunction)=>{
         try {
@@ -67,6 +69,19 @@ class UserController implements Controller {
             return res.status(500).send({ message: err.message });
           }
     }
+
+    // @desc    Delete all users
+    // @route   DELETE /api/user/delete/id
+    // Private Endpoint
+    private deleteUser =  async(req: Request, res: Response, next: NextFunction)=>{
+      try {
+          const user: User = await this.user.findByIdAndDelete(req.params.id);
+          if(!user) {return res.status(404).send({message: "Error while deleting User"});}
+          return res.status(200).send(user);
+        } catch (err:any) {
+          return res.status(500).send({ message: err.message });
+        }
+  }
 
 }
 
