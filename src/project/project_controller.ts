@@ -21,9 +21,9 @@ class ProjectController implements Controller{
           this.router.get(`${this.path}/get/admin`, authorizeUser, authorizeAdmin, this.getAllProjects)
           this.router.get(`${this.path}/get/projectManager`, authorizeUser, authorizeProjectManager, this.getProjectsProjectManager)
           this.router.put(`${this.path}/add/teamLead/:projectId`, authorizeUser, authorizeProjectManager, validateBody(addTeamLeadProjectSchema), this.addTeamLead)
-          this.router.put(`${this.path}/teamMember/:id`, authorizeUser, validateBody(addOrRemoveTeamMemberProjectSchema), this.addTeamMember)
-          this.router.put(`${this.path}/teamMember/remove/:id`, authorizeUser, validateBody(addOrRemoveTeamMemberProjectSchema), this.removeTeamMember)
-          this.router.put(`${this.path}/status/:id`, authorizeUser, validateBody(updateProjectStatusSchema) , this.updateProjectStatus)
+          this.router.put(`${this.path}/teamMember/:projectId`, authorizeUser, authorizeProjectManager, validateBody(addOrRemoveTeamMemberProjectSchema), this.addTeamMember)
+          this.router.put(`${this.path}/teamMember/remove/:projectId`, authorizeUser, authorizeProjectManager, validateBody(addOrRemoveTeamMemberProjectSchema), this.removeTeamMember)
+          this.router.put(`${this.path}/status/:projectId`, authorizeUser, authorizeProjectManager, validateBody(updateProjectStatusSchema) , this.updateProjectStatus)
           
       }
 
@@ -89,12 +89,12 @@ class ProjectController implements Controller{
     }
 
     // @desc    Add Team Member to Project
-    // @route   PUT /api/project/teamMember/:id
+    // @route   PUT /api/project/teamMember/:projectId
     // Private Endpoint
     private addTeamMember = async (req: Request, res: Response, next: NextFunction) =>{
         try {
             // validate whether the teamMember id being passed is a team member or not
-            const project = await this.project.findById(req.params.id);
+            const project = await this.project.findById(req.params.projectId);
             if(!project) {return res.status(404).send({message: "Project not found"});}
             const index = project.teamMember.indexOf(req.body.teamMember);
             if (index !== -1) {
@@ -110,13 +110,13 @@ class ProjectController implements Controller{
     }
 
     // @desc    Remove Team Member from Project
-    // @route   PUT /api/project/teamMember/remove/:id
+    // @route   PUT /api/project/teamMember/remove/:projectId
     // Private Endpoint
     private removeTeamMember = async (req: Request, res: Response, next: NextFunction) =>{
         try 
         {
             // validate whether the teamMember id being passed is a team member or not
-            const project = await this.project.findById(req.params.id);
+            const project = await this.project.findById(req.params.projectId);
             if(!project) {return res.status(404).send({message: "Project not found"});}
             const members = project.teamMember; // remove
             const index = members.indexOf(req.body.teamMember);
@@ -135,11 +135,11 @@ class ProjectController implements Controller{
     }
 
     // @desc    Change Status of Project
-    // @route   PUT /api/project/status/:id
+    // @route   PUT /api/project/status/:projectId
     // Private Endpoint
     private updateProjectStatus = async (req: Request, res: Response, next: NextFunction) =>{
       try {
-          const project = await this.project.findById(req.params.id);
+          const project = await this.project.findById(req.params.projectId);
           if(!project) {return res.status(404).send({message: "Project not found"});}
           project.status = req.body.status;
           const result = await project.save();

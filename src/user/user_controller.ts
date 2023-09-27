@@ -20,7 +20,8 @@ class UserController implements Controller {
         this.router.get(`${this.path}`, authorizeUser, authorizeAdmin, this.getAllUsers)
         this.router.get(`${this.path}/getOne/:id`, authorizeUser, authorizeAdmin, this.getUser)
         this.router.delete(`${this.path}/delete/:id`, authorizeUser, authorizeAdmin, this.deleteUser)
-        this.router.get(`${this.path}/get/teamLead`, authorizeUser, this.getTeamLeads) // comment: Who would be able to access this?
+        this.router.get(`${this.path}/get/teamLeads`, authorizeUser, this.getTeamLeads) // comment: Who would be able to access this?
+        this.router.get(`${this.path}/get/teamMembers`, authorizeUser, this.getTeamMembers) // comment: Who would be able to access this?
         
     }
 
@@ -81,12 +82,25 @@ class UserController implements Controller {
         }
   }
 
-    // @desc    Get all users
+    // @desc    Get all Team Leads
     // @route   GET /api/user/get/teamLeads
     // Private Endpoint
     private getTeamLeads = async (req: Request, res: Response, next: NextFunction) =>{
       try {
           const users: User[] = await this.user.find({role:"Team Lead"});
+          if(!users) {return res.status(404).send({message: "Error fetching Team Leads"});}
+          return res.status(200).send(users);
+        } catch (err:any) {
+          return res.status(500).send({ message: err.message });
+        }
+  }
+
+  // @desc    Get all Team Members
+    // @route   GET /api/user/get/teamMembers
+    // Private Endpoint
+    private getTeamMembers = async (req: Request, res: Response, next: NextFunction) =>{
+      try {
+          const users: User[] = await this.user.find({role:"Team Member"});
           if(!users) {return res.status(404).send({message: "Error fetching Team Leads"});}
           return res.status(200).send(users);
         } catch (err:any) {
