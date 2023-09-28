@@ -1,8 +1,9 @@
 import { Router, Request, Response, NextFunction,} from 'express';
 import Controller from '../interface/controller_interface';
 import taskModel from './task_model';
-import { createTaskSchema, changeStatusTask ,validateBody } from '../middleware/validateBody';
+import { createTaskSchema, changeStatusTask ,validateBody, AddorRemoveMemberTask } from '../middleware/validateBody';
 import { Task } from './task_interface';
+import { authorizeTeamLead, authorizeTeamMember, authorizeUser } from '../middleware/authorization';
 
 class TaskController implements Controller {
     
@@ -16,11 +17,12 @@ class TaskController implements Controller {
 
     private initialiseRoutes(){
         // Add Middlewares
-        this.router.post(`${this.path}`, validateBody(createTaskSchema), this.createTask)
-        this.router.get(`${this.path}/getAll/:id`, this.getTasks)
-        this.router.put(`${this.path}/add`, this.AddMemberToTask)
-        this.router.put(`${this.path}/remove`, this.RemoveMemberFromTask)
-        this.router.put(`${this.path}/status`,validateBody(changeStatusTask), this.changeStatusTask)
+        this.router.post(`${this.path}`,authorizeUser, authorizeTeamLead, validateBody(createTaskSchema), this.createTask)
+        this.router.get(`${this.path}/getAll/:projectId`, authorizeUser , authorizeTeamMember, this.getTasks)
+        this.router.delete(`${this.path}/delete/:taskId`, authorizeUser , authorizeTeamLead, this.deleteTask)
+        this.router.put(`${this.path}/addMember/:taskId`, authorizeUser , authorizeTeamLead, validateBody(AddorRemoveMemberTask), this.AddMemberToTask)
+        this.router.put(`${this.path}/removeMember/:taskId`, authorizeUser , authorizeTeamLead, validateBody(AddorRemoveMemberTask), this.RemoveMemberFromTask)
+        this.router.put(`${this.path}/status/:taskId`, authorizeUser , authorizeTeamMember, validateBody(changeStatusTask), this.changeStatusTask)
         
     }
 
@@ -43,11 +45,11 @@ class TaskController implements Controller {
   }
 
     // @desc    Get Tasks of Project
-    // @route   Get /api/task/getAll/:id
+    // @route   Get /api/task/getAll/:projectId
     // Private Endpoint
     private getTasks = async (req: Request, res: Response, next: NextFunction)=>{
       try {
-        const tasks: Task[] = await this.task.find({projectId: req.params.id})
+        const tasks: Task[] = await this.task.find({projectId: req.params.projectId}).populate('assignedTo','fullname')
         if(!tasks) {return res.status(401).send({message: "Error while fetching tasks"});}
           return res.status(200).send(tasks);
         } catch (err:any) { // comment: will this stay any?
@@ -55,12 +57,24 @@ class TaskController implements Controller {
         }
   }
 
+    // @desc    Get Tasks of Project
+    // @route   Get /api/task/delete/:taskId
+    // Private Endpoint
+    private deleteTask = async (req: Request, res: Response, next: NextFunction)=>{
+      try {
+        const taskNow: Task= await this.task.findOneAndDelete({_id:req.params.taskId})
+        if(!taskNow) {return res.status(401).send({message: "Error while deleting tasks"});}
+          return res.status(200).send(taskNow);
+        } catch (err:any) { // comment: will this stay any?
+          return res.status(500).send({ message: err.message });
+        }
+  }
     // @desc    Add Member to Task
-    // @route   PUT /api/task/remove
+    // @route   PUT /api/task/addMember/:taskId
     // Private Endpoint
     private AddMemberToTask = async (req: Request, res: Response, next: NextFunction)=>{
       try {
-        const taskNow = await this.task.findById(req.body.taskId)
+        const taskNow = await this.task.findById(req.params.taskId)
         if(!taskNow){return res.status(404).send({message: "Task not found"});}
         const index = taskNow.assignedTo.indexOf(req.body.member);
             if (index !== -1) {
@@ -70,17 +84,17 @@ class TaskController implements Controller {
           const result = await taskNow.save();
           if(!result) {return res.status(401).send({message: "Error while saving task"});}
           return res.status(201).send(result);
-        } catch (err:any) { // will this stay any?
+        } catch (err:any) { // comment: will this stay any?
           return res.status(500).send({ message: err.message });
         }
   }
 
-  // @desc    Remove Member from Task
-    // @route   PUT /api/task/remove
+    // @desc    Remove Member from Task
+    // @route   PUT /api/task/removeMember/:taskId
     // Private Endpoint
     private RemoveMemberFromTask = async (req: Request, res: Response, next: NextFunction)=>{
       try {
-        const taskNow = await this.task.findById(req.body.taskId)
+        const taskNow = await this.task.findById(req.params.taskId)
         if(!taskNow){return res.status(404).send({message: "Task not found"});}
         const index = taskNow.assignedTo.indexOf(req.body.member);
             if (index === -1) {
@@ -90,23 +104,23 @@ class TaskController implements Controller {
             const result = await taskNow.save();
           if(!result) {return res.status(401).send({message: "Error while saving task"});}
           return res.status(201).send(result);
-        } catch (err:any) { // will this stay any?
+        } catch (err:any) { // comment: will this stay any?
           return res.status(500).send({ message: err.message });
         }
   }
 
-  // @desc    Change Status of Task
-    // @route   PUT /api/task/status
+    // @desc    Change Status of Task
+    // @route   PUT /api/task/status/:taskId
     // Private Endpoint
     private changeStatusTask = async (req: Request, res: Response, next: NextFunction)=>{
       try {
-        const taskNow = await this.task.findById(req.body.taskId)
+        const taskNow = await this.task.findById(req.params.taskId)
         if(!taskNow){return res.status(404).send({message: "Task not found"});}
         taskNow.status = req.body.status;
         const result = await taskNow.save();
           if(!result) {return res.status(401).send({message: "Error while saving task"});}
           return res.status(201).send(result);
-        } catch (err:any) { // will this stay any?
+        } catch (err:any) { // comment: will this stay any?
           return res.status(500).send({ message: err.message });
         }
   }
