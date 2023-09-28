@@ -18,6 +18,7 @@ class ProjectController implements Controller{
 
     private initializeRoutes(){
           this.router.post(`${this.path}`, authorizeUser, authorizeAdmin, validateBody(createProjectSchema) ,this.createProject)
+          this.router.delete(`${this.path}/delete/:projectId`, authorizeUser, authorizeAdmin ,this.deleteProject)
           this.router.get(`${this.path}/get/admin`, authorizeUser, authorizeAdmin, this.getAllProjects)
           this.router.get(`${this.path}/get/projectManager`, authorizeUser, authorizeProjectManager, this.getProjectsProjectManager)
           this.router.get(`${this.path}/get/teamLead`, authorizeUser, authorizeTeamLead, this.getProjectsTeamLead)
@@ -45,6 +46,20 @@ class ProjectController implements Controller{
             return res.status(500).send({ message: err.message });
           }
     }
+
+    // @desc    Create a project
+    // @route   DELETE /api/project/delete/:projectId
+    // Private Endpoint
+    private deleteProject = async (req: Request, res: Response, next: NextFunction)=>{
+      
+        try {
+          const projectNow: Project = await this.project.findByIdAndDelete(req.params.projectId);
+          if(!projectNow) {return res.status(404).send({message: "Error while deleting Project"});}
+          return res.status(200).send(projectNow);
+        } catch (err:any) {
+          return res.status(500).send({ message: err.message });
+        }  
+  }
 
     // @desc    Get all projects for Admin
     // @route   GET /api/project/get/admin
