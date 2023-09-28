@@ -24,6 +24,24 @@ class TaskController implements Controller {
         
     }
 
+    // @desc    Create a Task
+    // @route   POST /api/task
+    // Private Endpoint
+    private createTask = async (req: Request, res: Response, next: NextFunction)=>{
+      try {
+          const taskNew = new this.task({
+              description: req.body.description,
+              assignedTo: req.body.assignedTo, 
+              projectId: req.body.projectId,           
+            });
+          const result = await taskNew.save();
+          if(!result) {return res.status(401).send({message: "Error while saving task"});}
+          return res.status(201).send(result);
+        } catch (err:any) { // will this stay any?
+          return res.status(500).send({ message: err.message });
+        }
+  }
+
     // @desc    Get Tasks of Project
     // @route   Get /api/task/getAll/:id
     // Private Endpoint
@@ -32,28 +50,10 @@ class TaskController implements Controller {
         const tasks: Task[] = await this.task.find({projectId: req.params.id})
         if(!tasks) {return res.status(401).send({message: "Error while fetching tasks"});}
           return res.status(200).send(tasks);
-        } catch (err:any) { // will this stay any?
+        } catch (err:any) { // comment: will this stay any?
           return res.status(500).send({ message: err.message });
         }
   }
-
-    // @desc    Create a Task
-    // @route   POST /api/task
-    // Private Endpoint
-    private createTask = async (req: Request, res: Response, next: NextFunction)=>{
-        try {
-            const taskNew = new this.task({
-                description: req.body.description,
-                assignedTo: req.body.assignedTo, 
-                projectId: req.body.projectId,           
-              });
-            const result = await taskNew.save();
-            if(!result) {return res.status(401).send({message: "Error while saving task"});}
-            return res.status(201).send(result);
-          } catch (err:any) { // will this stay any?
-            return res.status(500).send({ message: err.message });
-          }
-    }
 
     // @desc    Add Member to Task
     // @route   PUT /api/task/remove

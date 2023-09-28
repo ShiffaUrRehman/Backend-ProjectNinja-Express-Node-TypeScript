@@ -27,6 +27,7 @@ class ProjectController implements Controller{
           this.router.put(`${this.path}/teamMember/:projectId`, authorizeUser, authorizeProjectManager, validateBody(addOrRemoveTeamMemberProjectSchema), this.addTeamMember)
           this.router.put(`${this.path}/teamMember/remove/:projectId`, authorizeUser, authorizeProjectManager, validateBody(addOrRemoveTeamMemberProjectSchema), this.removeTeamMember)
           this.router.put(`${this.path}/status/:projectId`, authorizeUser, authorizeProjectManager, validateBody(updateProjectStatusSchema) , this.updateProjectStatus)
+          this.router.get(`${this.path}/members/:projectId`, authorizeUser, authorizeTeamLead , this.getAllMembers)
           
       }
 
@@ -120,10 +121,10 @@ class ProjectController implements Controller{
         try {
             // comment: validate whether the teamLead id being passed is a team lead or not
             // From Frontend, I will give a dropdown having only team leads.
-            const project = await this.project.findById(req.params.projectId);
-            if(!project) {return res.status(404).send({message: "Project not found"});}
-            project.teamLead = req.body.teamLead;
-            const result = await project.save();
+            const projectNow = await this.project.findById(req.params.projectId);
+            if(!projectNow) {return res.status(404).send({message: "Project not found"});}
+            projectNow.teamLead = req.body.teamLead;
+            const result = await projectNow.save();
             if(!result) {return res.status(400).send({message: "Error while saving document"});}
             return res.status(200).send(result);
           } catch (err:any) { // comment: how to use custom error handler created by me
@@ -181,12 +182,28 @@ class ProjectController implements Controller{
     // Private Endpoint
     private updateProjectStatus = async (req: Request, res: Response, next: NextFunction) =>{
       try {
-          const project = await this.project.findById(req.params.projectId);
-          if(!project) {return res.status(404).send({message: "Project not found"});}
-          project.status = req.body.status;
-          const result = await project.save();
+          const projectNow = await this.project.findById(req.params.projectId);
+          if(!projectNow) {return res.status(404).send({message: "Project not found"});}
+          projectNow.status = req.body.status;
+          const result = await projectNow.save();
           if(!result) {return res.status(400).send({message: "Error while saving document"});}
           return res.status(200).send(result);
+        } catch (err:any) {
+          return res.status(500).send({ message: err.message });
+        }
+  }
+
+    // @desc    Get All Members of Project
+    // @route   GET /api/project/members/:projectId
+    // Private Endpoint
+    private getAllMembers = async (req: Request, res: Response, next: NextFunction) =>{
+      try {
+          const projectNow = await this.project.findById( req.params.projectId).populate("projectManager", "fullname").populate("teamLead", "fullname").populate("teamMember", "fullname");;
+          if(!projectNow) {return res.status(404).send({message: "Project not found"});}
+          const members = projectNow.teamMember;
+          members.push(projectNow.teamLead)
+          members.push(projectNow.projectManager)
+          return res.status(200).send(members);
         } catch (err:any) {
           return res.status(500).send({ message: err.message });
         }
