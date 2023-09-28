@@ -13,11 +13,11 @@ const projectSchema = new mongoose.Schema(
             type: String,
             maxlength: 1024,
             // minlength: 255,
-            minlength: 5, // for now
+            minlength: 5, // comment: for now
             required: true,
           },
           status:{
-            type: String, // this should be ProjectStatus?
+            type: String, // comment: this should be ProjectStatus?
             enum: ["Onboarding", "In Progress", "Complete"],
             required: true,
             default: "Onboarding",

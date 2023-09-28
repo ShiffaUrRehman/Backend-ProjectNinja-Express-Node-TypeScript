@@ -31,13 +31,11 @@ class AuthenticationController implements Controller{
             const user = await this.User.findOne({ username: req.body.username });
             if (!user) {
               next(new WrongCredentialsException());
-              // return res.status(404).send({ message: "User not found" });
             }
             else {
               const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
               if (!isPasswordCorrect) {
                 next(new WrongCredentialsException());
-                // return res.status(404).send({ message: "Provided password is incorrect" });
               } else {
                 const token = this.createToken(user)
                 res.status(200).send({ user, token });

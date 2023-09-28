@@ -47,7 +47,7 @@ class ProjectController implements Controller{
           }
     }
 
-    // @desc    Create a project
+    // @desc    Delete a project
     // @route   DELETE /api/project/delete/:projectId
     // Private Endpoint
     private deleteProject = async (req: Request, res: Response, next: NextFunction)=>{
@@ -137,14 +137,14 @@ class ProjectController implements Controller{
     private addTeamMember = async (req: Request, res: Response, next: NextFunction) =>{
         try {
             // validate whether the teamMember id being passed is a team member or not
-            const project = await this.project.findById(req.params.projectId);
-            if(!project) {return res.status(404).send({message: "Project not found"});}
-            const index = project.teamMember.indexOf(req.body.teamMember);
+            const projectNow = await this.project.findById(req.params.projectId);
+            if(!projectNow) {return res.status(404).send({message: "Project not found"});}
+            const index = projectNow.teamMember.indexOf(req.body.teamMember);
             if (index !== -1) {
                return res.status(401).send({message: "Member already added to Project"});
             }
-            project.teamMember.push(req.body.teamMember);
-            const result = await project.save();
+            projectNow.teamMember.push(req.body.teamMember);
+            const result = await projectNow.save();
             if(!result) {return res.status(400).send({message: "Error while saving document"});}
             return res.status(200).send(result);
           } catch (err:any) {
@@ -159,16 +159,15 @@ class ProjectController implements Controller{
         try 
         {
             // validate whether the teamMember id being passed is a team member or not
-            const project = await this.project.findById(req.params.projectId);
-            if(!project) {return res.status(404).send({message: "Project not found"});}
-            const members = project.teamMember; // remove
-            const index = members.indexOf(req.body.teamMember);
+            const projectNow = await this.project.findById(req.params.projectId);
+            if(!projectNow) {return res.status(404).send({message: "Project not found"});} 
+            const index = projectNow.teamMember.indexOf(req.body.teamMember);
             if (index === -1) {
                return res.status(404).send({message: "Member not found"});
             }
             else {
-            project.teamMember.splice(index, 1);
-            const result = await project.save();
+            projectNow.teamMember.splice(index, 1);
+            const result = await projectNow.save();
             if(!result) {return res.status(400).send({message: "Error while saving document"});}
             return res.status(200).send(result);
         }
