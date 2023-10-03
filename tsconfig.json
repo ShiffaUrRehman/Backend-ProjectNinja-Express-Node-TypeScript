@@ -117,12 +117,14 @@
     "alwaysStrict": true,
     "noImplicitAny": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "moduleResolution": "node", // this onwards is new 
+    "removeComments": true, 
   },
   "include": [
     "src/**/*.ts"
   ],
   "exclude": [
     "node_modules"
-  ]
+  ],
 }
