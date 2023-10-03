@@ -81,8 +81,7 @@ class TaskController implements Controller {
             if (index !== -1) {
                return res.status(401).send({message: "Member already added to Task"});
             }
-          taskNow.assignedTo.push(req.body.member);
-          const result = await taskNow.save();
+          const result = await this.task.updateOne({_id:req.params.taskId}, {$push:{"assignedTo":req.body.member}})
           if(!result) {return res.status(401).send({message: "Error while saving task"});}
           return res.status(201).send(result);
         } catch (err:any) { // comment: will this stay any?
@@ -101,8 +100,7 @@ class TaskController implements Controller {
             if (index === -1) {
                return res.status(401).send({message: "Member not found"});
             }
-            taskNow.assignedTo.splice(index, 1);
-            const result = await taskNow.save();
+            const result = await this.task.updateOne({_id:req.params.taskId},{$pull:{"assignedTo":req.body.member}})
           if(!result) {return res.status(401).send({message: "Error while saving task"});}
           return res.status(201).send(result);
         } catch (err:any) { // comment: will this stay any?

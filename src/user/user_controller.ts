@@ -27,7 +27,7 @@ class UserController implements Controller {
     }
 
     // @desc    Create a user
-    // @route   POST /api/user
+    // @route   POST /api/users
     // Private Endpoint
     private createUser = async (req: Request, res: Response, next: NextFunction)=>{
         try {
@@ -45,7 +45,7 @@ class UserController implements Controller {
     }
 
     // @desc    Get all users
-    // @route   GET /api/user
+    // @route   GET /api/users
     // Private Endpoint
     private getAllUsers = async (req: Request, res: Response, next: NextFunction) =>{
         try {
@@ -58,7 +58,7 @@ class UserController implements Controller {
     }
 
     // @desc    Get single user
-    // @route   GET /api/user/getOne/:id
+    // @route   GET /api/users/getOne/:id
     // Private Endpoint
     private getUser =  async(req: Request, res: Response, next: NextFunction)=>{
         try {
@@ -71,7 +71,7 @@ class UserController implements Controller {
     }
 
     // @desc    Delete all users
-    // @route   DELETE /api/user/delete/:id
+    // @route   DELETE /api/users/delete/:id
     // Private Endpoint
     private deleteUser =  async(req: Request, res: Response, next: NextFunction)=>{
       try {
@@ -84,7 +84,7 @@ class UserController implements Controller {
   }
 
     // @desc    Get all Team Leads
-    // @route   GET /api/user/get/teamLeads
+    // @route   GET /api/users/get/teamLeads
     // Private Endpoint
     private getTeamLeads = async (req: Request, res: Response, next: NextFunction) =>{
       try {

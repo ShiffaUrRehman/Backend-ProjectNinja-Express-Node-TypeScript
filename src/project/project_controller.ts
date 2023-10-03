@@ -138,15 +138,14 @@ class ProjectController implements Controller{
     // Private Endpoint
     private addTeamMember = async (req: Request, res: Response, next: NextFunction) =>{
         try {
-            // validate whether the teamMember id being passed is a team member or not
+            // comment: validate whether the teamMember id being passed is a team member or not
             const projectNow = await this.project.findById(req.params.projectId);
             if(!projectNow) {return res.status(404).send({message: "Project not found"});}
             const index = projectNow.teamMember.indexOf(req.body.teamMember);
             if (index !== -1) {
                return res.status(401).send({message: "Member already added to Project"});
             }
-            projectNow.teamMember.push(req.body.teamMember);
-            const result = await projectNow.save();
+            const result = await this.project.updateOne({_id:req.params.projectId}, {$push:{"teamMember":req.body.teamMember}})
             if(!result) {return res.status(400).send({message: "Error while saving document"});}
             return res.status(200).send(result);
           } catch (err:any) {
@@ -160,7 +159,7 @@ class ProjectController implements Controller{
     private removeTeamMember = async (req: Request, res: Response, next: NextFunction) =>{
         try 
         {
-            // validate whether the teamMember id being passed is a team member or not
+            // comment: validate whether the teamMember id being passed is a team member or not
             const projectNow = await this.project.findById(req.params.projectId);
             if(!projectNow) {return res.status(404).send({message: "Project not found"});} 
             const index = projectNow.teamMember.indexOf(req.body.teamMember);
@@ -168,8 +167,7 @@ class ProjectController implements Controller{
                return res.status(404).send({message: "Member not found"});
             }
             else {
-            projectNow.teamMember.splice(index, 1);
-            const result = await projectNow.save();
+            const result = await this.project.updateOne({_id:req.params.projectId},{$pull:{"teamMember":req.body.teamMember}})
             if(!result) {return res.status(400).send({message: "Error while saving document"});}
             return res.status(200).send(result);
         }
