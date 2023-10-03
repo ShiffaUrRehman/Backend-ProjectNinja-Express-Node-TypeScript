@@ -120,8 +120,6 @@ class ProjectController implements Controller{
     // Private Endpoint
     private addTeamLead = async (req: Request, res: Response, next: NextFunction) =>{
         try {
-            // comment: validate whether the teamLead id being passed is a team lead or not
-            // From Frontend, I will give a dropdown having only team leads.
             const projectNow = await this.project.findById(req.params.projectId);
             if(!projectNow) {return res.status(404).send({message: "Project not found"});}
             projectNow.teamLead = req.body.teamLead;
@@ -138,7 +136,6 @@ class ProjectController implements Controller{
     // Private Endpoint
     private addTeamMember = async (req: Request, res: Response, next: NextFunction) =>{
         try {
-            // comment: validate whether the teamMember id being passed is a team member or not
             const projectNow = await this.project.findById(req.params.projectId);
             if(!projectNow) {return res.status(404).send({message: "Project not found"});}
             const index = projectNow.teamMember.indexOf(req.body.teamMember);
@@ -159,7 +156,6 @@ class ProjectController implements Controller{
     private removeTeamMember = async (req: Request, res: Response, next: NextFunction) =>{
         try 
         {
-            // comment: validate whether the teamMember id being passed is a team member or not
             const projectNow = await this.project.findById(req.params.projectId);
             if(!projectNow) {return res.status(404).send({message: "Project not found"});} 
             const index = projectNow.teamMember.indexOf(req.body.teamMember);

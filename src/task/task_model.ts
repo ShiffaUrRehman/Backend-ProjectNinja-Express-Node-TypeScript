@@ -8,7 +8,7 @@ const taskSchema = new mongoose.Schema(
             type: String,
             maxlength: 1024,
             // minlength: 255,
-            minlength: 5, // comment: for now
+            minlength: 5,
             required: true,
           },
           status:{
