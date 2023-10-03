@@ -13,15 +13,16 @@ class UserController implements Controller {
 
     constructor(){
         this.initializeRoutes()
+        this.router.use(authorizeUser);
     }
 
     private initializeRoutes(){
-        this.router.post(`${this.path}`, authorizeUser, authorizeAdmin, validateBody(createUserSchema), this.createUser)
-        this.router.get(`${this.path}`, authorizeUser, authorizeAdmin, this.getAllUsers)
-        this.router.get(`${this.path}/getOne/:id`, authorizeUser, authorizeAdmin, this.getUser)
-        this.router.delete(`${this.path}/delete/:id`, authorizeUser, authorizeAdmin, this.deleteUser)
-        this.router.get(`${this.path}/get/teamLeads`, authorizeUser, this.getTeamLeads) // comment: Who would be able to access this?
-        this.router.get(`${this.path}/get/teamMembers`, authorizeUser, this.getTeamMembers) // comment: Who would be able to access this?
+        this.router.post(`${this.path}`, authorizeAdmin, validateBody(createUserSchema), this.createUser)
+        this.router.get(`${this.path}`, authorizeAdmin, this.getAllUsers)
+        this.router.get(`${this.path}/getOne/:id`, authorizeAdmin, this.getUser)
+        this.router.delete(`${this.path}/delete/:id`, authorizeAdmin, this.deleteUser)
+        this.router.get(`${this.path}/get/teamLeads`, this.getTeamLeads) // comment: Who would be able to access this?
+        this.router.get(`${this.path}/get/teamMembers`, this.getTeamMembers) // comment: Who would be able to access this?
         
     }
 

@@ -1,9 +1,9 @@
 import { Router, Request, Response, NextFunction,} from 'express';
 import Controller from '../interface/controller_interface';
 import taskModel from './task_model';
-import { createTaskSchema, changeStatusTask ,validateBody, AddorRemoveMemberTask } from '../middleware/validateBody';
+import { createTaskSchema, changeStatusTask ,validateBody, addOrRemoveMemberTask } from '../middleware/validateBody';
 import { Task } from './task_interface';
-import { authorizeTeamLead, authorizeTeamMember, authorizeUser } from '../middleware/authorization';
+import { authorizeTeamLead, authorizeUser } from '../middleware/authorization';
 
 class TaskController implements Controller {
     
@@ -13,16 +13,17 @@ class TaskController implements Controller {
 
     constructor(){
         this.initialiseRoutes()
+        this.router.use(authorizeUser);
     }
 
     private initialiseRoutes(){
         // Add Middlewares
-        this.router.post(`${this.path}`,authorizeUser, authorizeTeamLead, validateBody(createTaskSchema), this.createTask)
-        this.router.get(`${this.path}/getAll/:projectId`, authorizeUser , authorizeTeamMember, this.getTasks)
-        this.router.delete(`${this.path}/delete/:taskId`, authorizeUser , authorizeTeamLead, this.deleteTask)
-        this.router.put(`${this.path}/addMember/:taskId`, authorizeUser , authorizeTeamLead, validateBody(AddorRemoveMemberTask), this.AddMemberToTask)
-        this.router.put(`${this.path}/removeMember/:taskId`, authorizeUser , authorizeTeamLead, validateBody(AddorRemoveMemberTask), this.RemoveMemberFromTask)
-        this.router.put(`${this.path}/status/:taskId`, authorizeUser , authorizeTeamMember, validateBody(changeStatusTask), this.changeStatusTask)
+        this.router.post(`${this.path}`, authorizeTeamLead, validateBody(createTaskSchema), this.createTask)
+        this.router.get(`${this.path}/getAll/:projectId`, this.getTasks)
+        this.router.delete(`${this.path}/delete/:taskId`, authorizeTeamLead, this.deleteTask)
+        this.router.put(`${this.path}/addMember/:taskId`, authorizeTeamLead, validateBody(addOrRemoveMemberTask), this.addMemberToTask)
+        this.router.put(`${this.path}/removeMember/:taskId`, authorizeTeamLead, validateBody(addOrRemoveMemberTask), this.removeMemberFromTask)
+        this.router.put(`${this.path}/status/:taskId`, validateBody(changeStatusTask), this.changeStatusTask)
         
     }
 
@@ -58,7 +59,7 @@ class TaskController implements Controller {
   }
 
     // @desc    Get Tasks of Project
-    // @route   Get /api/task/delete/:taskId
+    // @route   DELETE /api/task/delete/:taskId
     // Private Endpoint
     private deleteTask = async (req: Request, res: Response, next: NextFunction)=>{
       try {
@@ -72,7 +73,7 @@ class TaskController implements Controller {
     // @desc    Add Member to Task
     // @route   PUT /api/task/addMember/:taskId
     // Private Endpoint
-    private AddMemberToTask = async (req: Request, res: Response, next: NextFunction)=>{
+    private addMemberToTask = async (req: Request, res: Response, next: NextFunction)=>{
       try {
         const taskNow = await this.task.findById(req.params.taskId)
         if(!taskNow){return res.status(404).send({message: "Task not found"});}
@@ -92,7 +93,7 @@ class TaskController implements Controller {
     // @desc    Remove Member from Task
     // @route   PUT /api/task/removeMember/:taskId
     // Private Endpoint
-    private RemoveMemberFromTask = async (req: Request, res: Response, next: NextFunction)=>{
+    private removeMemberFromTask = async (req: Request, res: Response, next: NextFunction)=>{
       try {
         const taskNow = await this.task.findById(req.params.taskId)
         if(!taskNow){return res.status(404).send({message: "Task not found"});}

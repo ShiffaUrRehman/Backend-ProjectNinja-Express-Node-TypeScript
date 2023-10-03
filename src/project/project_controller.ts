@@ -3,7 +3,7 @@ import Controller from '../interface/controller_interface';
 import projectModel from './project_model';
 import { Project } from './project_interface';
 import { createProjectSchema, updateProjectStatusSchema, addTeamLeadProjectSchema, addOrRemoveTeamMemberProjectSchema ,validateBody } from '../middleware/validateBody';
-import { authorizeAdmin, authorizeProjectManager, authorizeTeamLead, authorizeTeamMember, authorizeUser } from '../middleware/authorization';
+import { authorizeAdmin, authorizeProjectManager, authorizeTeamLead, authorizeUser } from '../middleware/authorization';
 import { RequestWithUser } from 'interface/requestWithUser';
 
 class ProjectController implements Controller{
@@ -14,20 +14,21 @@ class ProjectController implements Controller{
 
     constructor() {
         this.initializeRoutes()
+        this.router.use(authorizeUser);
     }
 
     private initializeRoutes(){
-          this.router.post(`${this.path}`, authorizeUser, authorizeAdmin, validateBody(createProjectSchema) ,this.createProject)
-          this.router.delete(`${this.path}/delete/:projectId`, authorizeUser, authorizeAdmin ,this.deleteProject)
-          this.router.get(`${this.path}/get/admin`, authorizeUser, authorizeAdmin, this.getAllProjects)
-          this.router.get(`${this.path}/get/projectManager`, authorizeUser, authorizeProjectManager, this.getProjectsProjectManager)
-          this.router.get(`${this.path}/get/teamLead`, authorizeUser, authorizeTeamLead, this.getProjectsTeamLead)
-          this.router.get(`${this.path}/get/teamMember`, authorizeUser, authorizeTeamMember, this.getProjectsTeamMembers)
-          this.router.put(`${this.path}/add/teamLead/:projectId`, authorizeUser, authorizeProjectManager, validateBody(addTeamLeadProjectSchema), this.addTeamLead)
-          this.router.put(`${this.path}/teamMember/:projectId`, authorizeUser, authorizeProjectManager, validateBody(addOrRemoveTeamMemberProjectSchema), this.addTeamMember)
-          this.router.put(`${this.path}/teamMember/remove/:projectId`, authorizeUser, authorizeProjectManager, validateBody(addOrRemoveTeamMemberProjectSchema), this.removeTeamMember)
-          this.router.put(`${this.path}/status/:projectId`, authorizeUser, authorizeProjectManager, validateBody(updateProjectStatusSchema) , this.updateProjectStatus)
-          this.router.get(`${this.path}/members/:projectId`, authorizeUser, authorizeTeamLead , this.getAllMembers)
+          this.router.post(`${this.path}`, authorizeAdmin, validateBody(createProjectSchema) ,this.createProject)
+          this.router.delete(`${this.path}/delete/:projectId`, authorizeAdmin ,this.deleteProject)
+          this.router.get(`${this.path}/get/admin`, authorizeAdmin, this.getAllProjects)
+          this.router.get(`${this.path}/get/projectManager`, authorizeProjectManager, this.getProjectsProjectManager)
+          this.router.get(`${this.path}/get/teamLead`, authorizeTeamLead, this.getProjectsTeamLead)
+          this.router.get(`${this.path}/get/teamMember`, this.getProjectsTeamMembers)
+          this.router.put(`${this.path}/add/teamLead/:projectId`, authorizeProjectManager, validateBody(addTeamLeadProjectSchema), this.addTeamLead)
+          this.router.put(`${this.path}/teamMember/:projectId`, authorizeProjectManager, validateBody(addOrRemoveTeamMemberProjectSchema), this.addTeamMember)
+          this.router.put(`${this.path}/teamMember/remove/:projectId`, authorizeProjectManager, validateBody(addOrRemoveTeamMemberProjectSchema), this.removeTeamMember)
+          this.router.put(`${this.path}/status/:projectId`, authorizeProjectManager, validateBody(updateProjectStatusSchema) , this.updateProjectStatus)
+          this.router.get(`${this.path}/members/:projectId`, authorizeTeamLead , this.getAllMembers)
           
       }
 

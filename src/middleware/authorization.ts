@@ -69,16 +69,3 @@ export const authorizeTeamLead = async (req: RequestWithUser, res: Response, nex
   );
 }
 }
-
-// comment: Do we need this?
-export const authorizeTeamMember = async (req: RequestWithUser, res: Response, next: NextFunction) => { // comment: Not sure if we need this
-  // Check if the role is Admin / Project Manager / Team Lead or Not
-  if (req.user.role === "Admin" || req.user.role === "Project Manager" || req.user.role === "Team Lead" || req.user.role === "Team Member") {
-    next();
-  }
-  else 
-  {return res.status(403).send({
-    message: "Not Authorized, Only Admin / Project Manager / Team Lead / Team Member can access this route",}
-  );
-}
-}

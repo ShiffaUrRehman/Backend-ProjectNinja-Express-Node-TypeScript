@@ -127,5 +127,4 @@
   "exclude": [
     "node_modules"
   ],
-  "typeRoots": ["./src/types/express/index"],
 }
