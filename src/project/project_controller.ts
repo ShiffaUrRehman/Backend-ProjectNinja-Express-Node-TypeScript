@@ -28,7 +28,7 @@ class ProjectController implements Controller{
           this.router.put(`${this.path}/teamMember/:projectId`, authorizeProjectManager, validateBody(addOrRemoveTeamMemberProjectSchema), this.addTeamMember)
           this.router.put(`${this.path}/teamMember/remove/:projectId`, authorizeProjectManager, validateBody(addOrRemoveTeamMemberProjectSchema), this.removeTeamMember)
           this.router.put(`${this.path}/status/:projectId`, authorizeProjectManager, validateBody(updateProjectStatusSchema) , this.updateProjectStatus)
-          this.router.get(`${this.path}/members/:projectId`, authorizeTeamLead , this.getAllMembers)
+          this.router.get(`${this.path}/members/:projectId` , this.getAllMembers)
           this.router.get(`${this.path}/get/project/:projectId`, this.getProject)
       }
 
