@@ -29,7 +29,7 @@ class ProjectController implements Controller{
           this.router.put(`${this.path}/teamMember/remove/:projectId`, authorizeProjectManager, validateBody(addOrRemoveTeamMemberProjectSchema), this.removeTeamMember)
           this.router.put(`${this.path}/status/:projectId`, authorizeProjectManager, validateBody(updateProjectStatusSchema) , this.updateProjectStatus)
           this.router.get(`${this.path}/members/:projectId`, authorizeTeamLead , this.getAllMembers)
-          
+          this.router.get(`${this.path}/get/project/:projectId`, this.getProject)
       }
 
     // @desc    Create a project
@@ -203,6 +203,20 @@ class ProjectController implements Controller{
           return res.status(500).send({ message: err.message });
         }
   }
+
+    // @desc    Get project by id
+    // @route   GET /api/project/get/project/:projectId
+    // Private Endpoint
+    private getProject = async (req: Request, res: Response, next: NextFunction) =>{
+      try {
+          const project: Project = await this.project.findById(req.params.projectId).populate("projectManager", "fullname").populate("teamLead", "fullname").populate("teamMember", "fullname"); // comment: see if we need to populate all these or not
+          if(!project) {return res.status(404).send({message: "Error fetching Project"});}
+          return res.status(200).send(project);
+        } catch (err:any) {
+          return res.status(500).send({ message: err.message });
+        }
+  }
+
 }
 
 export default ProjectController;
