@@ -24,6 +24,7 @@ class TaskController implements Controller {
         this.router.put(`${this.path}/addMember/:taskId`, authorizeTeamLead, validateBody(addOrRemoveMemberTask), this.addMemberToTask)
         this.router.put(`${this.path}/removeMember/:taskId`, authorizeTeamLead, validateBody(addOrRemoveMemberTask), this.removeMemberFromTask)
         this.router.put(`${this.path}/status/:taskId`, validateBody(changeStatusTask), this.changeStatusTask)
+        this.router.get(`${this.path}/get/:taskId`, this.getTask)
         
     }
 
@@ -120,6 +121,19 @@ class TaskController implements Controller {
           if(!result) {return res.status(401).send({message: "Error while saving task"});}
           return res.status(201).send(result);
         } catch (err:any) { // comment: will this stay any?
+          return res.status(500).send({ message: err.message });
+        }
+  }
+
+    // @desc    Get a single Task of Project
+    // @route   Get /api/task/get/:taskId
+    // Private Endpoint
+    private getTask = async (req: Request, res: Response, next: NextFunction)=>{
+      try {
+        const task: Task = await this.task.findById(req.params.taskId).populate('assignedTo','fullname')
+        if(!task) {return res.status(401).send({message: "Error while fetching task"});}
+          return res.status(200).send(task);
+        } catch (err:any) { 
           return res.status(500).send({ message: err.message });
         }
   }
